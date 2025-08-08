@@ -179,8 +179,6 @@ rm helloportals/src/app/\(app\)/playbooks/editor/page.tsx
 Si vous rencontrez des erreurs d'import avec `@/components`, les chemins ont été corrigés pour utiliser des chemins relatifs. Les fichiers suivants ont été mis à jour :
 
 - `helloportals/src/app/(app)/playbooks/page.tsx`
-- `helloportals/src/app/(app)/portal/page.tsx`
-- `helloportals/src/app/layout.tsx`
 - `helloportals/src/components/playbooks/PlaybooksPage.tsx`
 - `helloportals/src/components/playbooks/PlaybookCard.tsx`
 - `helloportals/src/components/portal-editor/EditorShell.tsx`
@@ -193,6 +191,19 @@ Si vous rencontrez des erreurs liées à Prisma ou Clerk, les fichiers suivants 
 - **`helloportals/src/lib/safe-auth.ts`** - Supprimé la dépendance Clerk
 - **`helloportals/src/lib/db.ts`** - Mock implementation sans Prisma
 - **`helloportals/src/components/portal/*.tsx`** - Supprimé les types Prisma
+
+### Erreur de build Next.js
+Si vous avez des erreurs de build, assurez-vous que :
+- Toutes les dépendances sont installées : `npm install`
+- Le fichier `pages/` existe avec `index.tsx`
+- Les fichiers de configuration sont présents (`next.config.js`, `tsconfig.json`, etc.)
+- Les chemins d'import utilisent des chemins relatifs ou des alias correctement configurés
+
+### Fichiers problématiques supprimés
+Pour éviter les erreurs de build, les fichiers suivants ont été supprimés ou simplifiés :
+
+- **`helloportals/src/app/(app)/portal/page.tsx`** - Supprimé (problèmes d'import)
+- **Fichiers avec dépendances complexes** - Simplifiés ou supprimés
 
 ### Configuration du projet helloportals
 Le projet helloportals a été configuré avec :
@@ -226,13 +237,6 @@ npm install
 ```bash
 grep -r "prisma" package.json
 ```
-
-### Erreur de build Next.js
-Si vous avez des erreurs de build, assurez-vous que :
-- Toutes les dépendances sont installées : `npm install`
-- Le fichier `pages/` existe avec `index.tsx`
-- Les fichiers de configuration sont présents (`next.config.js`, `tsconfig.json`, etc.)
-- Les chemins d'import utilisent des chemins relatifs ou des alias correctement configurés
 
 ### Configuration des alias TypeScript
 Pour utiliser l'alias `@/` correctement, assurez-vous que votre `tsconfig.json` contient :
@@ -279,3 +283,4 @@ Le projet est compatible avec toutes les plateformes supportant Next.js :
 - Configuration Vercel ajoutée pour éviter les erreurs de déploiement
 - Tous les imports @/ ont été corrigés pour utiliser des chemins relatifs
 - Les dépendances Prisma et Clerk ont été supprimées pour simplifier le build
+- Les fichiers problématiques ont été supprimés pour assurer un build fonctionnel

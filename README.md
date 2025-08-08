@@ -41,6 +41,7 @@ http://localhost:3000
 ├── tailwind.config.js        # Configuration Tailwind
 ├── postcss.config.js         # Configuration PostCSS
 ├── globals.css              # Styles globaux
+├── vercel.json              # Configuration Vercel
 └── next-env.d.ts            # Types Next.js
 ```
 
@@ -191,6 +192,30 @@ Le projet helloportals a été configuré avec :
 - **`helloportals/tailwind.config.js`** - Configuration Tailwind
 - **`helloportals/postcss.config.js`** - Configuration PostCSS
 
+### Erreur de déploiement Prisma
+Si vous rencontrez une erreur `npm run prisma:generate` lors du déploiement :
+
+1. **Supprimer le package-lock.json et le régénérer :**
+```bash
+rm package-lock.json
+npm install
+```
+
+2. **Vérifier que le vercel.json est correct :**
+```json
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next"
+}
+```
+
+3. **S'assurer qu'aucun script Prisma n'est référencé :**
+```bash
+grep -r "prisma" package.json
+```
+
 ### Erreur de build Next.js
 Si vous avez des erreurs de build, assurez-vous que :
 - Toutes les dépendances sont installées : `npm install`
@@ -240,3 +265,4 @@ Le projet est compatible avec toutes les plateformes supportant Next.js :
 - Les chemins d'import ont été corrigés pour éviter les erreurs de compilation
 - Le fichier ReactFlow a été temporairement désactivé pour éviter les erreurs de build
 - Le projet helloportals a été configuré avec les bonnes dépendances et configurations
+- Configuration Vercel ajoutée pour éviter les erreurs de déploiement

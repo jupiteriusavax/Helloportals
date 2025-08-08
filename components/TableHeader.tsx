@@ -1,41 +1,77 @@
 import React from 'react';
-import { cn } from '../utils/cn';
-import { ArrowsUpDownIcon } from '@heroicons/react/24/outline';
-
-export type SortKey = 'oppAmount' | 'lastClientView' | null;
-export type SortOrder = 'asc' | 'desc';
+import { SortDirection, SortKey } from '../types';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 interface TableHeaderProps {
   allSelected: boolean;
   someSelected: boolean;
   onToggleAll: () => void;
-  sortKey: SortKey;
-  sortOrder: SortOrder;
-  onChangeSort: (key: Exclude<SortKey, null>) => void;
+  sortBy: SortKey;
+  sortDirection: SortDirection;
+  onRequestSort: (key: Exclude<SortKey, null>) => void;
 }
 
-export const TableHeader: React.FC<TableHeaderProps> = ({
+export function TableHeader({
   allSelected,
   someSelected,
   onToggleAll,
-  sortKey,
-  sortOrder,
-  onChangeSort,
-}) => {
-  const sortIndicator = (key: Exclude<SortKey, null>) => (
-    <ArrowsUpDownIcon
-      className={cn(
-        'h-4 w-4 ml-1 inline-block align-middle',
-        sortKey === key ? 'text-gray-900' : 'text-gray-400'
-      )}
-    />
+  sortBy,
+  sortDirection,
+  onRequestSort,
+}: TableHeaderProps) {
+  const sortIcon = (key: Exclude<SortKey, null>) => (
+    <span className="ml-1 inline-flex">
+      <ChevronDownIcon
+        className={
+          'h-4 w-4 transition-transform ' +
+          (sortBy === key && sortDirection === 'asc' ? 'rotate-180' : '')
+        }
+      />
+    </span>
   );
+
+  const headerCell = (
+    text: string,
+    opts?: { sortable?: boolean; sortKey?: Exclude<SortKey, null>; align?: 'left' | 'right' }
+  ) => {
+    const sortable = opts?.sortable;
+    const key = opts?.sortKey;
+    const align = opts?.align ?? 'left';
+    const isActive = key && sortBy === key;
+
+    return (
+      <th
+        scope="col"
+        className={
+          'px-3 py-2 text-sm font-semibold text-gray-700 whitespace-nowrap ' +
+          (align === 'right' ? 'text-right' : 'text-left')
+        }
+      >
+        {sortable && key ? (
+          <button
+            type="button"
+            className={
+              'inline-flex items-center hover:text-gray-900 ' +
+              (isActive ? 'text-gray-900' : '')
+            }
+            onClick={() => onRequestSort(key)}
+          >
+            {text}
+            {sortIcon(key)}
+          </button>
+        ) : (
+          text
+        )}
+      </th>
+    );
+  };
 
   return (
     <thead className="bg-gray-50">
-      <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-        <th className="px-4 py-3 w-8">
+      <tr>
+        <th className="w-10 px-3 py-2">
           <input
+            aria-label="Select all rows"
             type="checkbox"
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             checked={allSelected}
@@ -45,21 +81,17 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             onChange={onToggleAll}
           />
         </th>
-        <th className="px-4 py-3">Account</th>
-        <th className="px-4 py-3">Workspace</th>
-        <th className="px-4 py-3">Owner</th>
-        <th className="px-4 py-3 cursor-pointer select-none" onClick={() => onChangeSort('oppAmount')}>
-          <span className="inline-flex items-center">Opp Amount {sortIndicator('oppAmount')}</span>
-        </th>
-        <th className="px-4 py-3 cursor-pointer select-none" onClick={() => onChangeSort('lastClientView')}>
-          <span className="inline-flex items-center">Last Client View {sortIndicator('lastClientView')}</span>
-        </th>
-        <th className="px-4 py-3">Views</th>
-        <th className="px-4 py-3">Order Form Status</th>
-        <th className="px-4 py-3">Plan Status</th>
+        {headerCell('Account')}
+        {headerCell('Workspace')}
+        {headerCell('Owner')}
+        {headerCell('Opp Amount', { sortable: true, sortKey: 'oppAmount', align: 'right' })}
+        {headerCell('Last Client View', { sortable: true, sortKey: 'lastClientView' })}
+        {headerCell('Views', { align: 'right' })}
+        {headerCell('Order Form Status')}
+        {headerCell('Plan Status')}
       </tr>
     </thead>
   );
-};
+}
 
 export default TableHeader;

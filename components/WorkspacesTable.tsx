@@ -1,153 +1,189 @@
 import React, { useMemo, useState } from 'react';
-import { PlusIcon } from '@heroicons/react/24/outline';
-import workspacesData from '../data/workspaces';
-import { WorkspaceRow } from '../types/workspace';
-import { FilterBar } from './FilterBar';
-import { TableHeader, SortKey, SortOrder } from './TableHeader';
+import { CreatedRange, FilterBar } from './FilterBar';
+import TableHeader from './TableHeader';
 import TableRow from './TableRow';
+import { SortDirection, SortKey, WorkspaceRow } from '../types';
+import { workspaces, uniqueOwners } from '../data/workspaces';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
-function filterByCreatedDate(rows: WorkspaceRow[], range: string): WorkspaceRow[] {
-  if (range === 'Any time') return rows;
-  const now = new Date();
-  const daysMap: Record<string, number> = {
-    'Last 7 days': 7,
-    'Last 30 days': 30,
-    'Last 90 days': 90,
-  };
-  const days = daysMap[range] ?? 0;
-  if (!days) return rows;
-  const cutoff = new Date(now);
-  cutoff.setDate(now.getDate() - days);
-  return rows.filter((r) => new Date(r.createdAt) >= cutoff);
+const dateFmt = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: '2-digit',
+});
+
+function formatDate(iso: string) {
+  return dateFmt.format(new Date(iso));
 }
 
-function sortRows(rows: WorkspaceRow[], key: SortKey, order: SortOrder): WorkspaceRow[] {
-  if (!key) return rows;
-  const sorted = [...rows].sort((a, b) => {
-    if (key === 'oppAmount') {
-      return a.oppAmount - b.oppAmount;
-    }
-    if (key === 'lastClientView') {
-      return new Date(a.lastClientView).getTime() - new Date(b.lastClientView).getTime();
-    }
-    return 0;
-  });
-  return order === 'asc' ? sorted : sorted.reverse();
-}
-
-export const WorkspacesTable: React.FC = () => {
+export function WorkspacesTable() {
   const [search, setSearch] = useState('');
-  const [owner, setOwner] = useState('All');
-  const [created, setCreated] = useState('Any time');
-  const [sortKey, setSortKey] = useState<SortKey>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [owner, setOwner] = useState<string | 'All'>('All');
+  const [createdRange, setCreatedRange] = useState<CreatedRange>('All');
+  const [sortBy, setSortBy] = useState<SortKey>('lastClientView');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const onChangeSort = (key: Exclude<SortKey, null>) => {
-    if (sortKey === key) {
-      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortKey(key);
-      setSortOrder('desc');
-    }
-  };
-
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    let rows = workspacesData.filter((r) => {
-      const matchesText = !q ||
-        r.account.name.toLowerCase().includes(q) ||
-        r.workspaceName.toLowerCase().includes(q);
-      const matchesOwner = owner === 'All' || r.owner.name === owner;
-      return matchesText && matchesOwner;
-    });
-    rows = filterByCreatedDate(rows, created);
-    return sortRows(rows, sortKey, sortOrder);
-  }, [search, owner, created, sortKey, sortOrder]);
+    const searchLower = search.trim().toLowerCase();
 
-  const allSelected = filtered.length > 0 && filtered.every((r) => selected.has(r.id));
-  const someSelected = filtered.some((r) => selected.has(r.id));
+    let rows = workspaces.filter((w) => {
+      const matchText =
+        w.account.name.toLowerCase().includes(searchLower) ||
+        w.workspace.toLowerCase().includes(searchLower);
 
-  const toggleAll = () => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (allSelected) {
-        filtered.forEach((r) => next.delete(r.id));
-      } else {
-        filtered.forEach((r) => next.add(r.id));
+      const matchOwner = owner === 'All' ? true : w.owner.name === owner;
+
+      const now = new Date();
+      const created = new Date(w.createdAt);
+      let matchDate = true;
+      if (createdRange === 'Last 7 days') {
+        const d = new Date(now);
+        d.setDate(d.getDate() - 7);
+        matchDate = created >= d;
+      } else if (createdRange === 'Last 30 days') {
+        const d = new Date(now);
+        d.setDate(d.getDate() - 30);
+        matchDate = created >= d;
+      } else if (createdRange === 'This year') {
+        matchDate = created.getFullYear() === now.getFullYear();
       }
-      return next;
-    });
-  };
 
-  const toggleOne = (id: string) => {
+      return matchText && matchOwner && matchDate;
+    });
+
+    if (sortBy) {
+      rows = rows.slice().sort((a, b) => {
+        if (sortBy === 'oppAmount') {
+          return sortDirection === 'asc'
+            ? a.oppAmount - b.oppAmount
+            : b.oppAmount - a.oppAmount;
+        }
+        if (sortBy === 'lastClientView') {
+          const ta = new Date(a.lastClientView).getTime();
+          const tb = new Date(b.lastClientView).getTime();
+          return sortDirection === 'asc' ? ta - tb : tb - ta;
+        }
+        return 0;
+      });
+    }
+
+    return rows;
+  }, [search, owner, createdRange, sortBy, sortDirection]);
+
+  const allSelected = selected.size > 0 && filtered.every((r) => selected.has(r.id));
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll() {
+    if (allSelected) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filtered.map((r) => r.id)));
+    }
+  }
+
+  function toggleRow(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
-  };
+  }
+
+  function handleRequestSort(key: Exclude<SortKey, null>) {
+    if (sortBy === key) {
+      setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(key);
+      setSortDirection('asc');
+    }
+  }
+
+  const tabs = [
+    'Sales Pipeline',
+    'Customer Onboarding',
+    'Customer Success',
+    'Renewal Pipeline',
+  ];
+  const [activeTab, setActiveTab] = useState('Sales Pipeline');
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-2">
-        <h1 className="text-2xl font-semibold text-gray-900">Workspaces</h1>
-        <button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md">
-          <PlusIcon className="h-5 w-5" /> New Workspace
+    <div className="font-sans text-gray-900">
+      <div className="flex items-center justify-between py-4">
+        <h1 className="text-xl font-semibold">Workspaces</h1>
+        <button className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700">
+          <PlusIcon className="mr-2 h-5 w-5 text-blue-100" /> New Workspace
         </button>
       </div>
 
-      <div className="flex items-center gap-2 border-b border-gray-200 mb-2">
-        {['Sales Pipeline', 'Customer Onboarding', 'Customer Success', 'Renewal Pipeline'].map((tab, idx) => (
+      <div className="flex items-center gap-2 border-b border-gray-200">
+        {tabs.map((t) => (
           <button
-            key={tab}
+            key={t}
+            onClick={() => setActiveTab(t)}
             className={
-              'px-3 py-2 text-sm font-medium border-b-2 -mb-px ' +
-              (idx === 0 ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700')
+              'relative -mb-px whitespace-nowrap px-3 py-2 text-sm ' +
+              (activeTab === t
+                ? 'font-medium text-gray-900'
+                : 'text-gray-600 hover:text-gray-900')
             }
           >
-            {tab}
+            {t}
+            {activeTab === t && (
+              <span className="absolute inset-x-2 -bottom-px h-0.5 bg-blue-600" />
+            )}
           </button>
         ))}
-        <button className="ml-auto inline-flex items-center gap-1 text-sm text-gray-700 px-3 py-2 hover:bg-gray-50 rounded-md border border-dashed border-gray-300">
-          <PlusIcon className="h-4 w-4" /> Add View
-        </button>
+        <div className="ml-2 py-2">
+          <button className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+            + Add View
+          </button>
+        </div>
       </div>
 
-      <FilterBar
-        search={search}
-        onSearch={setSearch}
-        owner={owner}
-        onOwnerChange={setOwner}
-        created={created}
-        onCreatedChange={setCreated}
-      />
+      <div className="mt-4">
+        <FilterBar
+          search={search}
+          onSearchChange={setSearch}
+          owners={uniqueOwners}
+          selectedOwner={owner}
+          onOwnerChange={setOwner}
+          createdRange={createdRange}
+          onCreatedRangeChange={setCreatedRange}
+        />
+      </div>
 
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <TableHeader
-            allSelected={allSelected}
-            someSelected={someSelected}
-            onToggleAll={toggleAll}
-            sortKey={sortKey}
-            sortOrder={sortOrder}
-            onChangeSort={onChangeSort}
-          />
-          <tbody className="divide-y divide-gray-200">
-            {filtered.map((row, idx) => (
-              <TableRow
-                key={row.id}
-                row={row}
-                index={idx}
-                selected={selected.has(row.id)}
-                onToggle={toggleOne}
-              />
-            ))}
-          </tbody>
-        </table>
+      <div className="mt-4">
+        <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+          <table className="min-w-full divide-y divide-gray-200">
+            <TableHeader
+              allSelected={allSelected}
+              someSelected={someSelected}
+              onToggleAll={toggleAll}
+              sortBy={sortBy}
+              sortDirection={sortDirection}
+              onRequestSort={handleRequestSort}
+            />
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {filtered.map((row) => (
+                <TableRow
+                  key={row.id}
+                  row={row}
+                  selected={selected.has(row.id)}
+                  onToggle={toggleRow}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-3 text-xs text-gray-500">
+          Showing {filtered.length} of {workspaces.length}
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default WorkspacesTable;

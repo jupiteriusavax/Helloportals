@@ -1,102 +1,91 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ReactFlow, addEdge, useNodesState, useEdgesState, Connection, Edge, Node } from "reactflow";
-import "reactflow/dist/style.css";
-
-import Toolbar from "./Toolbar";
-import SidebarTree from "./SidebarTree";
+import { useState, useCallback } from "react";
 import Canvas from "./Canvas";
-import Inspector from "./Inspector";
-import Breadcrumbs from "./Breadcrumbs";
-import { loadPortal, savePortal, localProvider } from "../../lib/portal-schema/storage";
-import { cloneTemplateSMB } from "../../lib/portal-schema/mocks";
-import type { PortalDocument, PortalNode } from "../../lib/portal-schema/types";
-import { updateNodeById, findNodeById, reorderSibling } from "../../lib/portal-schema/transforms";
 
 interface EditorShellProps {
-  portalId?: string;
+  portal: any;
+  onSave: (portal: any) => void;
 }
 
-export default function EditorShell({ portalId }: EditorShellProps) {
-  const [portal, setPortal] = useState<PortalDocument | null>(null);
+export default function EditorShell({ portal, onSave }: EditorShellProps) {
+  const [nodes, setNodes] = useState<any[]>([]);
+  const [edges, setEdges] = useState<any[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // Load portal data
-  useEffect(() => {
-    if (portalId) {
-      loadPortal(portalId, localProvider).then(setPortal);
-    } else {
-      // Load template for new portal
-      cloneTemplateSMB().then(setPortal);
-    }
-  }, [portalId]);
-
-  // Convert portal nodes to ReactFlow nodes
-  useEffect(() => {
-    if (portal) {
-      const flowNodes = portal.nodes.map((node) => ({
-        id: node.id,
-        type: "default",
-        position: { x: node.x, y: node.y },
-        data: { label: node.title },
-      }));
-      setNodes(flowNodes);
-    }
-  }, [portal, setNodes]);
-
-  const selectedNode = useMemo(() => {
-    if (!selectedNodeId || !portal) return null;
-    return findNodeById(portal, selectedNodeId);
-  }, [selectedNodeId, portal]);
-
-  const handleNodeSelect = useCallback((nodeId: string) => {
-    setSelectedNodeId(nodeId);
+  const onNodesChange = useCallback((changes: any[]) => {
+    setNodes((nds) => {
+      // Simplified node change handling
+      return nds;
+    });
   }, []);
 
-  const handleNodeUpdate = useCallback((nodeId: string, updates: Partial<PortalNode>) => {
-    if (!portal) return;
-    const updatedPortal = updateNodeById(portal, nodeId, updates);
-    setPortal(updatedPortal);
-  }, [portal]);
+  const onEdgesChange = useCallback((changes: any[]) => {
+    setEdges((eds) => {
+      // Simplified edge change handling
+      return eds;
+    });
+  }, []);
 
-  const handleSave = useCallback(() => {
-    if (!portal) return;
-    savePortal(portal, localProvider);
-  }, [portal]);
+  const onConnect = useCallback((connection: any) => {
+    setEdges((eds) => [...eds, connection]);
+  }, []);
+
+  const handleSave = () => {
+    const updatedPortal = {
+      ...portal,
+      nodes,
+      edges,
+    };
+    onSave(updatedPortal);
+  };
 
   return (
-    <div className="flex h-screen">
-      <div className="w-64 border-r border-gray-200 bg-gray-50">
-        <SidebarTree
-          portal={portal}
-          selectedNodeId={selectedNodeId}
-          onNodeSelect={handleNodeSelect}
-        />
+    <div className="h-screen flex flex-col">
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-gray-900">Éditeur de portail</h1>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Sauvegarder
+          </button>
+        </div>
       </div>
       
-      <div className="flex-1 flex flex-col">
-        <Toolbar onSave={handleSave} />
-        <Breadcrumbs node={selectedNode} />
-        
+      <div className="flex-1 flex">
         <div className="flex-1">
           <Canvas
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
-            onNodeSelect={handleNodeSelect}
+            onConnect={onConnect}
           />
         </div>
-      </div>
-      
-      <div className="w-80 border-l border-gray-200 bg-gray-50">
-        <Inspector
-          node={selectedNode}
-          onNodeUpdate={handleNodeUpdate}
-        />
+        
+        <div className="w-80 bg-white border-l border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Propriétés</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Nom du portail</label>
+              <input
+                type="text"
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder="Nom du portail"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                rows={3}
+                placeholder="Description du portail"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

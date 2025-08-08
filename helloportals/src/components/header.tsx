@@ -1,35 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
-function isClerkEnabled() {
-  const pk = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
-  return pk.startsWith("pk_") && pk.length > 24 && !pk.includes("placeholder");
-}
-
-export function Header() {
-  const enabled = isClerkEnabled();
+export default function Header() {
   return (
-    <header className="w-full border-b bg-white/60 backdrop-blur">
-      <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="font-semibold">HelloPortals</Link>
-          <Link href="/portal" className="text-sm text-neutral-600 hover:text-black">Portail</Link>
-        </div>
-        <div>
-          {enabled ? (
-            <>
-              <SignedIn>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
-              <SignedOut>
-                <SignInButton>
-                  <button className="px-3 py-1.5 text-sm rounded-md bg-black text-white">Se connecter</button>
-                </SignInButton>
-              </SignedOut>
-            </>
-          ) : null}
+    <header className="bg-white shadow">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <div className="flex-shrink-0 flex items-center">
+              <Link href="/" className="text-xl font-bold text-gray-900">
+                HelloPortals
+              </Link>
+            </div>
+            <nav className="ml-6 flex space-x-8">
+              <Link
+                href="/playbooks"
+                className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Playbooks
+              </Link>
+              <Link
+                href="/integrations"
+                className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Intégrations
+              </Link>
+            </nav>
+          </div>
+          <div className="flex items-center">
+            <div className="flex space-x-4">
+              <Link
+                href="/sign-in"
+                className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Se connecter
+              </Link>
+              <Link
+                href="/sign-up"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
+              >
+                S'inscrire
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </header>

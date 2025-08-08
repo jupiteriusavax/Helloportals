@@ -22,6 +22,10 @@ http://localhost:3000
 ## 📁 Structure du projet
 
 ```
+├── pages/
+│   ├── index.tsx           # Page d'accueil
+│   ├── _app.tsx           # Configuration de l'app
+│   └── _document.tsx      # Configuration du document
 ├── components/
 │   ├── WorkspacesTable.tsx    # Composant principal
 │   ├── FilterBar.tsx         # Barre de filtres
@@ -31,10 +35,13 @@ http://localhost:3000
 ├── data/
 │   └── workspaces.ts         # Données mock
 ├── types.ts                  # Types TypeScript
-├── test-workspaces.tsx       # Fichier de test
 ├── package.json              # Dépendances
+├── next.config.js            # Configuration Next.js
+├── tsconfig.json             # Configuration TypeScript
 ├── tailwind.config.js        # Configuration Tailwind
-└── globals.css              # Styles globaux
+├── postcss.config.js         # Configuration PostCSS
+├── globals.css              # Styles globaux
+└── next-env.d.ts            # Types Next.js
 ```
 
 ## ✨ Fonctionnalités
@@ -62,8 +69,12 @@ http://localhost:3000
 
 ## 🎨 Utilisation
 
+L'interface est automatiquement affichée sur la page d'accueil (`http://localhost:3000`).
+
+Pour utiliser le composant dans d'autres pages :
+
 ```tsx
-import WorkspacesTable from './components/WorkspacesTable';
+import WorkspacesTable from '../components/WorkspacesTable';
 
 export default function MyPage() {
   return (
@@ -129,7 +140,7 @@ const colorByStatus: Record<OrderFormStatus, string> = {
 - React 18+
 - TypeScript
 - Tailwind CSS
-- Next.js (optionnel)
+- Next.js 14+
 
 ## 🛠️ Développement
 
@@ -147,21 +158,28 @@ npm run build
 npm start
 ```
 
-## 🎯 Test
+## 🚀 Déploiement
 
-Pour tester l'interface, utilisez le fichier `test-workspaces.tsx` :
+### Vercel (recommandé)
+```bash
+# Installer Vercel CLI
+npm i -g vercel
 
-```tsx
-import TestWorkspaces from './test-workspaces';
-
-export default function App() {
-  return <TestWorkspaces />;
-}
+# Déployer
+vercel
 ```
+
+### Autres plateformes
+Le projet est compatible avec toutes les plateformes supportant Next.js :
+- Netlify
+- Railway
+- Heroku
+- AWS Amplify
 
 ## 📝 Notes
 
-- Les icônes sont maintenant en SVG inline pour éviter les erreurs de dépendances
+- Les icônes sont en SVG inline pour éviter les erreurs de dépendances
 - Tailwind CSS est configuré avec la police Inter
 - Tous les composants sont TypeScript et réutilisables
 - L'interface est responsive et accessible
+- Structure Next.js complète avec pages/, configuration TypeScript et PostCSS

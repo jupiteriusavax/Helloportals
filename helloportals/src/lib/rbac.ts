@@ -1,4 +1,4 @@
-import { RoleType } from "@prisma/client";
+export type RoleType = "INTERNAL" | "CLIENT" | "STAKEHOLDER";
 
 export type Permission =
   | "view:sales-room"

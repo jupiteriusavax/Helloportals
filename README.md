@@ -186,6 +186,14 @@ Si vous rencontrez des erreurs d'import avec `@/components`, les chemins ont ét
 - `helloportals/src/components/portal-editor/EditorShell.tsx`
 - `helloportals/src/components/portal-editor/Canvas.tsx`
 
+### Erreur de dépendances Prisma/Clerk
+Si vous rencontrez des erreurs liées à Prisma ou Clerk, les fichiers suivants ont été simplifiés :
+
+- **`helloportals/src/lib/rbac.ts`** - Supprimé la dépendance Prisma
+- **`helloportals/src/lib/safe-auth.ts`** - Supprimé la dépendance Clerk
+- **`helloportals/src/lib/db.ts`** - Mock implementation sans Prisma
+- **`helloportals/src/components/portal/*.tsx`** - Supprimé les types Prisma
+
 ### Configuration du projet helloportals
 Le projet helloportals a été configuré avec :
 
@@ -270,3 +278,4 @@ Le projet est compatible avec toutes les plateformes supportant Next.js :
 - Le projet helloportals a été configuré avec les bonnes dépendances et configurations
 - Configuration Vercel ajoutée pour éviter les erreurs de déploiement
 - Tous les imports @/ ont été corrigés pour utiliser des chemins relatifs
+- Les dépendances Prisma et Clerk ont été supprimées pour simplifier le build

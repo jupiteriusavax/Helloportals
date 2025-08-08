@@ -1,8 +1,6 @@
 "use client";
 
-import type { UserProfile, Membership } from "@prisma/client";
-
-export default function ClientPortal({ _user, _membership }: { _user: UserProfile | null; _membership: Membership | undefined }) {
+export default function ClientPortal({ _user, _membership }: { _user: any; _membership: any }) {
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-semibold">Votre portail client</h1>

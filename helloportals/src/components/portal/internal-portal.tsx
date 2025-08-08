@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import type { UserProfile, Membership } from "@prisma/client";
 
-export default function InternalPortal({ _user, _membership }: { _user: UserProfile | null; _membership: Membership | undefined }) {
+export default function InternalPortal({ _user, _membership }: { _user: any; _membership: any }) {
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-semibold">HelloPortals — Vue Interne</h1>

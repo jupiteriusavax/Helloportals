@@ -4,7 +4,13 @@ import TableHeader from './TableHeader';
 import TableRow from './TableRow';
 import { SortDirection, SortKey, WorkspaceRow } from '../types';
 import { workspaces, uniqueOwners } from '../data/workspaces';
-import { PlusIcon } from '@heroicons/react/24/outline';
+
+// Icône Plus SVG inline
+const PlusIcon = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+  </svg>
+);
 
 const dateFmt = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -116,7 +122,7 @@ export function WorkspacesTable() {
           <h1 className="text-2xl font-semibold text-gray-900">Workspaces</h1>
         </div>
         <button className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors">
-          <PlusIcon className="mr-2 h-4 w-4" /> New Workspace
+          <PlusIcon /> New Workspace
         </button>
       </div>
 
@@ -137,7 +143,7 @@ export function WorkspacesTable() {
         ))}
         <div className="ml-2">
           <button className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-            <PlusIcon className="h-4 w-4" /> Add View
+            <PlusIcon /> Add View
           </button>
         </div>
       </div>

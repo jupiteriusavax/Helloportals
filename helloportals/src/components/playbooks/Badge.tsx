@@ -1,5 +1,4 @@
 import React from "react";
-import { twMerge } from "tailwind-merge";
 
 type Status = "draft" | "published" | "archived";
 
@@ -14,11 +13,11 @@ const statusMap: Record<Status, { color: string; text: string }> = {
   archived: { color: "bg-gray-100 text-gray-700", text: "Archivé" },
 };
 
-export function Badge({ status, className }: BadgeProps) {
+export function Badge({ status, className = "" }: BadgeProps) {
   const { color, text } = statusMap[status];
   
   return (
-    <span className={twMerge("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", color, className)}>
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${color} ${className}`}>
       {text}
     </span>
   );

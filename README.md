@@ -174,11 +174,34 @@ npm install reactflow
 rm helloportals/src/app/\(app\)/playbooks/editor/page.tsx
 ```
 
+### Erreur d'import @/components
+Si vous rencontrez des erreurs d'import avec `@/components`, les chemins ont été corrigés pour utiliser des chemins relatifs. Les fichiers suivants ont été mis à jour :
+
+- `helloportals/src/app/(app)/playbooks/page.tsx`
+- `helloportals/src/app/layout.tsx`
+- `helloportals/src/components/playbooks/PlaybooksPage.tsx`
+- `helloportals/src/components/playbooks/PlaybookCard.tsx`
+
 ### Erreur de build Next.js
 Si vous avez des erreurs de build, assurez-vous que :
 - Toutes les dépendances sont installées : `npm install`
 - Le fichier `pages/` existe avec `index.tsx`
 - Les fichiers de configuration sont présents (`next.config.js`, `tsconfig.json`, etc.)
+- Les chemins d'import utilisent des chemins relatifs ou des alias correctement configurés
+
+### Configuration des alias TypeScript
+Pour utiliser l'alias `@/` correctement, assurez-vous que votre `tsconfig.json` contient :
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+```
 
 ## 🚀 Déploiement
 
@@ -205,4 +228,5 @@ Le projet est compatible avec toutes les plateformes supportant Next.js :
 - Tous les composants sont TypeScript et réutilisables
 - L'interface est responsive et accessible
 - Structure Next.js complète avec pages/, configuration TypeScript et PostCSS
+- Les chemins d'import ont été corrigés pour éviter les erreurs de compilation
 - Le fichier ReactFlow a été temporairement désactivé pour éviter les erreurs de build

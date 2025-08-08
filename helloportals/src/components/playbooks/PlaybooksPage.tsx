@@ -1,90 +1,117 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-// import Link from "next/link";
-import { Plus } from "lucide-react";
-import { FilterBar } from "@/components/playbooks/FilterBar";
-import { PlaybookCard } from "@/components/playbooks/PlaybookCard";
-import { playbooks as mockPlaybooks } from "@/data/playbooks";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { FilterBar } from "./FilterBar";
+import { PlaybookCard } from "./PlaybookCard";
 
-export default function PlaybooksPage() {
-  const [tabOwner, setTabOwner] = useState<"organization" | "personal">("organization");
-  const [secondaryTab, setSecondaryTab] = useState<"playbooks" | "scenarios">("playbooks");
-  const [search, setSearch] = useState("");
+import { Button } from "../ui/button";
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return mockPlaybooks;
-    return mockPlaybooks.filter((p) =>
-      [p.title, p.description].some((f) => f.toLowerCase().includes(q))
-    );
-  }, [search]);
+interface Playbook {
+  id: string;
+  title: string;
+  description: string;
+  status: "draft" | "published" | "archived";
+  lastModified: string;
+  views: number;
+  author: {
+    name: string;
+    avatar: string;
+  };
+}
+
+const mockPlaybooks: Playbook[] = [
+  {
+    id: "1",
+    title: "Customer Onboarding Flow",
+    description: "Complete guide for new customer onboarding process",
+    status: "published",
+    lastModified: "2024-01-15",
+    views: 1247,
+    author: {
+      name: "Sarah Johnson",
+      avatar: "/avatars/sarah.jpg",
+    },
+  },
+  {
+    id: "2",
+    title: "Sales Qualification Checklist",
+    description: "Step-by-step qualification process for sales team",
+    status: "draft",
+    lastModified: "2024-01-10",
+    views: 892,
+    author: {
+      name: "Mike Chen",
+      avatar: "/avatars/mike.jpg",
+    },
+  },
+  {
+    id: "3",
+    title: "Product Demo Script",
+    description: "Standardized demo script for product presentations",
+    status: "published",
+    lastModified: "2024-01-08",
+    views: 2156,
+    author: {
+      name: "Emily Davis",
+      avatar: "/avatars/emily.jpg",
+    },
+  },
+  {
+    id: "4",
+    title: "Customer Success Playbook",
+    description: "Best practices for customer success management",
+    status: "archived",
+    lastModified: "2023-12-20",
+    views: 567,
+    author: {
+      name: "David Wilson",
+      avatar: "/avatars/david.jpg",
+    },
+  },
+];
+
+export function PlaybooksPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const filteredPlaybooks = mockPlaybooks.filter((playbook) => {
+    const matchesSearch = playbook.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()) ||
+      playbook.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || playbook.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <div className="min-h-[calc(100vh-56px)] bg-gray-50 py-8">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setTabOwner("organization")}
-              className={`rounded-full px-3 py-1.5 text-sm ${
-                tabOwner === "organization"
-                  ? "bg-gray-100 font-semibold text-gray-900"
-                  : "bg-gray-50 text-gray-600 border border-gray-200"
-              }`}
-            >
-              Organization
-            </button>
-            <button
-              onClick={() => setTabOwner("personal")}
-              className={`rounded-full px-3 py-1.5 text-sm ${
-                tabOwner === "personal"
-                  ? "bg-gray-100 font-semibold text-gray-900"
-                  : "bg-gray-50 text-gray-600 border border-gray-200"
-              }`}
-            >
-              Personal
-            </button>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Playbooks</h1>
+            <p className="mt-2 text-gray-600">
+              Create and manage your sales and customer success playbooks
+            </p>
           </div>
-
-          <Button className="rounded-full bg-blue-600 text-white hover:bg-blue-700">
-            <Plus className="mr-2 h-4 w-4" /> New Playbook
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            <PlusIcon className="h-5 w-5 mr-2" />
+            New Playbook
           </Button>
         </div>
 
-        <div className="mt-6">
-          <h1 className="text-2xl font-semibold text-gray-900">Playbooks</h1>
-        </div>
+        <FilterBar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+        />
 
-        <div className="mt-4 flex items-center gap-6 border-b border-gray-200">
-          <button
-            onClick={() => setSecondaryTab("playbooks")}
-            className={`pb-3 text-sm ${secondaryTab === "playbooks" ? "border-b-2 border-gray-900 font-medium" : "text-gray-500"}`}
-          >
-            Playbooks
-          </button>
-          <button
-            onClick={() => setSecondaryTab("scenarios")}
-            className={`pb-3 text-sm ${secondaryTab === "scenarios" ? "border-b-2 border-gray-900 font-medium" : "text-gray-500"}`}
-          >
-            Scenarios
-          </button>
-        </div>
-
-        <FilterBar search={search} onSearch={setSearch} />
-
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {filtered.map((pb) => (
-            <PlaybookCard key={pb.id} playbook={pb} />
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredPlaybooks.map((playbook) => (
+            <PlaybookCard key={playbook.id} playbook={playbook} />
           ))}
         </div>
-
-        {filtered.length === 0 ? (
-          <p className="mt-10 text-center text-sm text-gray-500">No playbooks found for this search.</p>
-        ) : null}
-
-        <div className="sr-only mt-2 text-xs text-gray-400">Owner tab: {tabOwner}; Secondary tab: {secondaryTab}</div>
       </div>
     </div>
   );

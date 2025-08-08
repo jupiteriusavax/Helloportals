@@ -1,38 +1,62 @@
 "use client";
 
-import Link from "next/link";
-import { Badge } from "@/components/playbooks/Badge";
-import { StatusDot } from "@/components/playbooks/StatusDot";
-import type { Playbook } from "@/data/playbooks";
+import React from "react";
+import { Badge } from "./Badge";
+import { StatusDot } from "./StatusDot";
 
-export function PlaybookCard({ playbook }: { playbook: Playbook }) {
+interface Playbook {
+  id: string;
+  title: string;
+  description: string;
+  status: "draft" | "published" | "archived";
+  lastModified: string;
+  views: number;
+  author: {
+    name: string;
+    avatar: string;
+  };
+}
+
+interface PlaybookCardProps {
+  playbook: Playbook;
+}
+
+export function PlaybookCard({ playbook }: PlaybookCardProps) {
   return (
-    <Link
-      href={`/playbooks/${playbook.id}`}
-      className="block rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:scale-[1.01] hover:shadow-md"
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900">{playbook.title}</h3>
-          <p className="mt-1 text-sm text-gray-500">{playbook.tasks} Tasks • {playbook.scenarios} Scenarios</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge color="blue" text={playbook.category} />
-          <Badge color="green" text={playbook.status} />
-        </div>
-      </div>
-
-      <p className="mt-3 text-sm text-gray-600">{playbook.description}</p>
-
-      <div className="mt-4 space-y-2">
-        {playbook.steps.map((step) => (
-          <div key={step.id} className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
-            <div className="h-6 w-6 shrink-0 rounded-full bg-gray-200" />
-            <span className="text-sm text-gray-900">{step.name}</span>
-            <StatusDot status={step.status} />
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <span className="text-blue-600 font-semibold text-sm">
+              {playbook.title.charAt(0)}
+            </span>
           </div>
-        ))}
+          <div>
+            <h3 className="font-semibold text-gray-900">{playbook.title}</h3>
+            <p className="text-sm text-gray-500">{playbook.description}</p>
+          </div>
+        </div>
+        <StatusDot status={playbook.status} />
       </div>
-    </Link>
+
+      <div className="flex items-center justify-between text-sm text-gray-500">
+        <div className="flex items-center space-x-2">
+          <img
+            src={playbook.author.avatar}
+            alt={playbook.author.name}
+            className="w-5 h-5 rounded-full"
+          />
+          <span>{playbook.author.name}</span>
+        </div>
+        <span>{playbook.views} views</span>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between">
+        <Badge status={playbook.status} />
+        <span className="text-xs text-gray-400">
+          Modified {new Date(playbook.lastModified).toLocaleDateString()}
+        </span>
+      </div>
+    </div>
   );
 }

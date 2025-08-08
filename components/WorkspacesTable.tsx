@@ -109,40 +109,40 @@ export function WorkspacesTable() {
   const [activeTab, setActiveTab] = useState('Sales Pipeline');
 
   return (
-    <div className="font-sans text-gray-900">
-      <div className="flex items-center justify-between py-4">
-        <h1 className="text-xl font-semibold">Workspaces</h1>
-        <button className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700">
-          <PlusIcon className="mr-2 h-5 w-5 text-blue-100" /> New Workspace
+    <div className="font-sans text-gray-900 bg-white">
+      <div className="flex items-center justify-between py-6 px-6 border-b border-gray-200">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-purple-600 rounded"></div>
+          <h1 className="text-2xl font-semibold text-gray-900">Workspaces</h1>
+        </div>
+        <button className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors">
+          <PlusIcon className="mr-2 h-4 w-4" /> New Workspace
         </button>
       </div>
 
-      <div className="flex items-center gap-2 border-b border-gray-200">
+      <div className="flex items-center gap-2 px-6 py-3 border-b border-gray-200 bg-gray-50">
         {tabs.map((t) => (
           <button
             key={t}
             onClick={() => setActiveTab(t)}
             className={
-              'relative -mb-px whitespace-nowrap px-3 py-2 text-sm ' +
+              'relative whitespace-nowrap px-4 py-2 text-sm font-medium rounded-md transition-colors ' +
               (activeTab === t
-                ? 'font-medium text-gray-900'
-                : 'text-gray-600 hover:text-gray-900')
+                ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50')
             }
           >
             {t}
-            {activeTab === t && (
-              <span className="absolute inset-x-2 -bottom-px h-0.5 bg-blue-600" />
-            )}
           </button>
         ))}
-        <div className="ml-2 py-2">
-          <button className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
-            + Add View
+        <div className="ml-2">
+          <button className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+            <PlusIcon className="h-4 w-4" /> Add View
           </button>
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="px-6 py-4">
         <FilterBar
           search={search}
           onSearchChange={setSearch}
@@ -154,8 +154,8 @@ export function WorkspacesTable() {
         />
       </div>
 
-      <div className="mt-4">
-        <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+      <div className="px-6 pb-6">
+        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
           <table className="min-w-full divide-y divide-gray-200">
             <TableHeader
               allSelected={allSelected}
@@ -166,7 +166,7 @@ export function WorkspacesTable() {
               onRequestSort={handleRequestSort}
             />
             <tbody className="divide-y divide-gray-200 bg-white">
-              {filtered.map((row) => (
+              {filtered.map((row, index) => (
                 <TableRow
                   key={row.id}
                   row={row}
@@ -178,8 +178,8 @@ export function WorkspacesTable() {
           </table>
         </div>
 
-        <div className="mt-3 text-xs text-gray-500">
-          Showing {filtered.length} of {workspaces.length}
+        <div className="mt-4 text-sm text-gray-500">
+          Showing {filtered.length} of {workspaces.length} workspaces
         </div>
       </div>
     </div>

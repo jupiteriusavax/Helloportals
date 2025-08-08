@@ -7,10 +7,10 @@ interface StatusBadgeProps {
 
 const colorByStatus: Record<OrderFormStatus, string> = {
   '': 'bg-transparent',
-  Draft: 'bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-200',
-  Viewed: 'bg-blue-100 text-blue-700 ring-1 ring-inset ring-blue-200',
-  'Needs Approval': 'bg-rose-100 text-rose-700 ring-1 ring-inset ring-rose-200',
-  Signed: 'bg-green-100 text-green-700 ring-1 ring-inset ring-green-200',
+  Draft: 'bg-gray-50 text-gray-600 border border-gray-200',
+  Viewed: 'bg-blue-50 text-blue-600 border border-blue-200',
+  'Needs Approval': 'bg-pink-50 text-pink-600 border border-pink-200',
+  Signed: 'bg-green-50 text-green-600 border border-green-200',
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {
@@ -18,7 +18,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <span
       className={
-        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ' +
+        'inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ' +
         colorByStatus[status]
       }
     >

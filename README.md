@@ -179,9 +179,12 @@ rm helloportals/src/app/\(app\)/playbooks/editor/page.tsx
 Si vous rencontrez des erreurs d'import avec `@/components`, les chemins ont été corrigés pour utiliser des chemins relatifs. Les fichiers suivants ont été mis à jour :
 
 - `helloportals/src/app/(app)/playbooks/page.tsx`
+- `helloportals/src/app/(app)/portal/page.tsx`
 - `helloportals/src/app/layout.tsx`
 - `helloportals/src/components/playbooks/PlaybooksPage.tsx`
 - `helloportals/src/components/playbooks/PlaybookCard.tsx`
+- `helloportals/src/components/portal-editor/EditorShell.tsx`
+- `helloportals/src/components/portal-editor/Canvas.tsx`
 
 ### Configuration du projet helloportals
 Le projet helloportals a été configuré avec :
@@ -266,3 +269,4 @@ Le projet est compatible avec toutes les plateformes supportant Next.js :
 - Le fichier ReactFlow a été temporairement désactivé pour éviter les erreurs de build
 - Le projet helloportals a été configuré avec les bonnes dépendances et configurations
 - Configuration Vercel ajoutée pour éviter les erreurs de déploiement
+- Tous les imports @/ ont été corrigés pour utiliser des chemins relatifs

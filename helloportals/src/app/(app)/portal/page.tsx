@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getPortalVariant } from "@/lib/rbac";
-import InternalPortal from "@/components/portal/internal-portal";
-import ClientPortal from "@/components/portal/client-portal";
-import StakeholderPortal from "@/components/portal/stakeholder-portal";
-import { safeAuth } from "@/lib/safe-auth";
+import { getPortalVariant } from "../../lib/rbac";
+import InternalPortal from "../../components/portal/internal-portal";
+import ClientPortal from "../../components/portal/client-portal";
+import StakeholderPortal from "../../components/portal/stakeholder-portal";
+import { safeAuth } from "../../lib/safe-auth";
 import type { UserProfile, Membership } from "@prisma/client";
 
 export default async function PortalPage() {
@@ -16,7 +16,7 @@ export default async function PortalPage() {
   let user: (UserProfile & { memberships: Membership[] }) | null = null;
   try {
     if (userId) {
-      const { prisma } = await import("@/lib/db");
+      const { prisma } = await import("../../lib/db");
       user = await prisma.userProfile.findUnique({ where: { clerkUserId: userId }, include: { memberships: true } });
     }
   } catch (_err) {

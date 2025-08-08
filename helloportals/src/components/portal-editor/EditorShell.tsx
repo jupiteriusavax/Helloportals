@@ -1,140 +1,102 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { create } from "zustand";
-import { shallow } from "zustand/shallow";
-import Toolbar from "@/components/portal-editor/Toolbar";
-import SidebarTree from "@/components/portal-editor/SidebarTree";
-import Canvas from "@/components/portal-editor/Canvas";
-import Inspector from "@/components/portal-editor/Inspector";
-import Breadcrumbs from "@/components/portal-editor/Breadcrumbs";
-import { loadPortal, savePortal, localProvider } from "@/lib/portal-schema/storage";
-import { cloneTemplateSMB } from "@/lib/portal-schema/mocks";
-import type { PortalDocument, PortalNode } from "@/lib/portal-schema/types";
-import { updateNodeById, findNodeById, reorderSibling } from "@/lib/portal-schema/transforms";
-import "@/styles/portal.css";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ReactFlow, addEdge, useNodesState, useEdgesState, Connection, Edge, Node } from "reactflow";
+import "reactflow/dist/style.css";
 
-interface EditorState {
-  doc: PortalDocument | null;
-  selectedNodeId: string | null;
-  preview: boolean;
-  zoom: number; // 0.5 - 2
-  showGrid: boolean;
-  breakpoint: "desktop" | "tablet" | "mobile";
-  setDoc: (doc: PortalDocument) => void;
-  select: (id: string | null) => void;
-  setPreview: (v: boolean) => void;
-  setZoom: (z: number) => void;
-  setGrid: (v: boolean) => void;
-  setBreakpoint: (b: EditorState["breakpoint"]) => void;
-  updateNode: (id: string, partial: Partial<PortalNode["props"]>) => void;
-  reorder: (parentId: string, activeId: string, overId: string) => void;
+import Toolbar from "./Toolbar";
+import SidebarTree from "./SidebarTree";
+import Canvas from "./Canvas";
+import Inspector from "./Inspector";
+import Breadcrumbs from "./Breadcrumbs";
+import { loadPortal, savePortal, localProvider } from "../../lib/portal-schema/storage";
+import { cloneTemplateSMB } from "../../lib/portal-schema/mocks";
+import type { PortalDocument, PortalNode } from "../../lib/portal-schema/types";
+import { updateNodeById, findNodeById, reorderSibling } from "../../lib/portal-schema/transforms";
+
+interface EditorShellProps {
+  portalId?: string;
 }
 
-export const useEditorStore = create<EditorState>((set, get) => ({
-  doc: null,
-  selectedNodeId: null,
-  preview: false,
-  zoom: 1,
-  showGrid: false,
-  breakpoint: "desktop",
-  setDoc: (doc) => set({ doc }),
-  select: (id) => set({ selectedNodeId: id }),
-  setPreview: (v) => set({ preview: v }),
-  setZoom: (z) => set({ zoom: Math.min(2, Math.max(0.5, z)) }),
-  setGrid: (v) => set({ showGrid: v }),
-  setBreakpoint: (b) => set({ breakpoint: b }),
-  updateNode: (id, partial) => {
-    const current = get().doc;
-    if (!current) return;
-    const next = updateNodeById(current, id, (node) => {
-      node.props = {
-        content: { ...(node.props.content ?? {}), ...(partial.content ?? {}) },
-        behavior: { ...(node.props.behavior ?? {}), ...(partial.behavior ?? {}) },
-        style: { ...(node.props.style ?? {}), ...(partial.style ?? {}) },
-      };
-    });
-    set({ doc: next });
-  },
-  reorder: (parentId, activeId, overId) => {
-    const current = get().doc;
-    if (!current) return;
-    const next = reorderSibling(current, parentId, activeId, overId);
-    set({ doc: next });
-  },
-}));
+export default function EditorShell({ portalId }: EditorShellProps) {
+  const [portal, setPortal] = useState<PortalDocument | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-export default function EditorShell({ workspaceId }: { workspaceId: string }) {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const { doc, selectedNodeId, preview, zoom, breakpoint } = useEditorStore(
-    (s) => ({ doc: s.doc, selectedNodeId: s.selectedNodeId, preview: s.preview, zoom: s.zoom, breakpoint: s.breakpoint }),
-    shallow
-  );
-
+  // Load portal data
   useEffect(() => {
-    const init = async () => {
-      const existing = await loadPortal(localProvider, workspaceId);
-      if (existing) {
-        useEditorStore.getState().setDoc(existing);
-      } else {
-        const draft = cloneTemplateSMB(workspaceId);
-        await savePortal(localProvider, workspaceId, draft);
-        useEditorStore.getState().setDoc(draft);
-      }
-      setLoading(false);
-    };
-    init();
-  }, [workspaceId]);
+    if (portalId) {
+      loadPortal(portalId, localProvider).then(setPortal);
+    } else {
+      // Load template for new portal
+      cloneTemplateSMB().then(setPortal);
+    }
+  }, [portalId]);
 
-  const onSave = useCallback(async () => {
-    const current = useEditorStore.getState().doc;
-    if (!current) return;
-    setSaving(true);
-    const next: PortalDocument = { ...current, updatedAt: new Date().toISOString() };
-    await savePortal(localProvider, workspaceId, next);
-    useEditorStore.getState().setDoc(next);
-    setSaving(false);
-  }, [workspaceId]);
-
+  // Convert portal nodes to ReactFlow nodes
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
-        e.preventDefault();
-        onSave();
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "p") {
-        e.preventDefault();
-        useEditorStore.setState((s) => ({ preview: !s.preview }));
-      }
-      if (e.key === "Escape") {
-        useEditorStore.setState({ selectedNodeId: null });
-      }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [onSave]);
+    if (portal) {
+      const flowNodes = portal.nodes.map((node) => ({
+        id: node.id,
+        type: "default",
+        position: { x: node.x, y: node.y },
+        data: { label: node.title },
+      }));
+      setNodes(flowNodes);
+    }
+  }, [portal, setNodes]);
 
-  if (loading || !doc) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
+  const selectedNode = useMemo(() => {
+    if (!selectedNodeId || !portal) return null;
+    return findNodeById(portal, selectedNodeId);
+  }, [selectedNodeId, portal]);
 
-  const mainPage = doc.pages[0];
+  const handleNodeSelect = useCallback((nodeId: string) => {
+    setSelectedNodeId(nodeId);
+  }, []);
+
+  const handleNodeUpdate = useCallback((nodeId: string, updates: Partial<PortalNode>) => {
+    if (!portal) return;
+    const updatedPortal = updateNodeById(portal, nodeId, updates);
+    setPortal(updatedPortal);
+  }, [portal]);
+
+  const handleSave = useCallback(() => {
+    if (!portal) return;
+    savePortal(portal, localProvider);
+  }, [portal]);
 
   return (
-    <div className="h-full w-full flex flex-col">
-      <header className="flex items-center justify-between border-b px-4 py-2 bg-white">
-        <div className="text-sm text-muted-foreground">Template SMB</div>
-        <div className="font-medium">{breakpoint === "desktop" ? "Desktop" : breakpoint === "tablet" ? "Tablet" : "Mobile"}</div>
-      </header>
-      <Toolbar saving={saving} onSave={onSave} />
-      <div className={`flex-1 grid ${preview ? "grid-cols-1" : "grid-cols-[280px_1fr_320px]"} h-[calc(100vh-88px)]`}>
-        {!preview && <SidebarTree root={doc} />}
-        <div className="bg-[#F7F8FA] overflow-auto">
-          <div className="mx-auto my-6" style={{ width: breakpoint === "desktop" ? 1200 * zoom : breakpoint === "tablet" ? 768 * zoom : 375 * zoom }}>
-            <Breadcrumbs />
-            <Canvas page={mainPage} zoom={zoom} />
-          </div>
+    <div className="flex h-screen">
+      <div className="w-64 border-r border-gray-200 bg-gray-50">
+        <SidebarTree
+          portal={portal}
+          selectedNodeId={selectedNodeId}
+          onNodeSelect={handleNodeSelect}
+        />
+      </div>
+      
+      <div className="flex-1 flex flex-col">
+        <Toolbar onSave={handleSave} />
+        <Breadcrumbs node={selectedNode} />
+        
+        <div className="flex-1">
+          <Canvas
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onNodeSelect={handleNodeSelect}
+          />
         </div>
-        {!preview && <Inspector />}
+      </div>
+      
+      <div className="w-80 border-l border-gray-200 bg-gray-50">
+        <Inspector
+          node={selectedNode}
+          onNodeUpdate={handleNodeUpdate}
+        />
       </div>
     </div>
   );

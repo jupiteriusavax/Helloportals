@@ -1,21 +1,24 @@
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
+type Status = "draft" | "published" | "archived";
+
 type BadgeProps = {
-  color: "blue" | "green" | "gray";
-  text: string;
+  status: Status;
   className?: string;
 };
 
-const colorMap: Record<BadgeProps["color"], string> = {
-  blue: "bg-blue-100 text-blue-800",
-  green: "bg-green-100 text-green-800",
-  gray: "bg-gray-100 text-gray-700",
+const statusMap: Record<Status, { color: string; text: string }> = {
+  draft: { color: "bg-yellow-100 text-yellow-800", text: "Brouillon" },
+  published: { color: "bg-green-100 text-green-800", text: "Publié" },
+  archived: { color: "bg-gray-100 text-gray-700", text: "Archivé" },
 };
 
-export function Badge({ color, text, className }: BadgeProps) {
+export function Badge({ status, className }: BadgeProps) {
+  const { color, text } = statusMap[status];
+  
   return (
-    <span className={twMerge("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", colorMap[color], className)}>
+    <span className={twMerge("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", color, className)}>
       {text}
     </span>
   );

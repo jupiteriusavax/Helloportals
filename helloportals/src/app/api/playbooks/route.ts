@@ -1,28 +1,50 @@
-import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-const PlaybookSchema = z.object({
-  name: z.string().min(1),
-  orgId: z.string().min(1),
-  accountId: z.string().optional(),
-  isTemplate: z.boolean().optional().default(false),
-  graphJson: z.any(),
-});
-
-export async function GET() {
-  const { userId } = await auth();
-  if (!userId) return new NextResponse("Unauthorized", { status: 401 });
-  const playbooks = await prisma.playbook.findMany({ take: 50, orderBy: { updatedAt: "desc" } });
-  return NextResponse.json(playbooks);
+export async function GET(request: NextRequest) {
+  try {
+    // Mock implementation without Clerk
+    const playbooks = [
+      {
+        id: "1",
+        name: "Sales Pipeline",
+        description: "Pipeline de vente standard",
+        status: "active",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "2", 
+        name: "Customer Onboarding",
+        description: "Processus d'intégration client",
+        status: "active",
+        createdAt: new Date().toISOString()
+      }
+    ];
+    
+    return NextResponse.json(playbooks);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to fetch playbooks" },
+      { status: 500 }
+    );
+  }
 }
 
-export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return new NextResponse("Unauthorized", { status: 401 });
-  const body = await req.json();
-  const input = PlaybookSchema.parse(body);
-  const created = await prisma.playbook.create({ data: input });
-  return NextResponse.json(created, { status: 201 });
+export async function POST(request: NextRequest) {
+  try {
+    // Mock implementation without Clerk
+    const body = await request.json();
+    
+    return NextResponse.json({
+      id: "new-playbook-id",
+      name: body.name,
+      description: body.description,
+      status: "active",
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to create playbook" },
+      { status: 500 }
+    );
+  }
 }

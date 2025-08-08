@@ -1,26 +1,50 @@
-import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-const SegmentSchema = z.object({
-  name: z.string().min(1),
-  orgId: z.string().min(1),
-  definition: z.any(),
-});
-
-export async function GET() {
-  const { userId } = await auth();
-  if (!userId) return new NextResponse("Unauthorized", { status: 401 });
-  const items = await prisma.segment.findMany({ take: 50, orderBy: { updatedAt: "desc" } });
-  return NextResponse.json(items);
+export async function GET(request: NextRequest) {
+  try {
+    // Mock implementation without Clerk
+    const segments = [
+      {
+        id: "1",
+        name: "Enterprise",
+        description: "Clients enterprise",
+        criteria: { type: "enterprise" },
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "2",
+        name: "SMB",
+        description: "Petites et moyennes entreprises", 
+        criteria: { type: "smb" },
+        createdAt: new Date().toISOString()
+      }
+    ];
+    
+    return NextResponse.json(segments);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to fetch segments" },
+      { status: 500 }
+    );
+  }
 }
 
-export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return new NextResponse("Unauthorized", { status: 401 });
-  const body = await req.json();
-  const input = SegmentSchema.parse(body);
-  const created = await prisma.segment.create({ data: input });
-  return NextResponse.json(created, { status: 201 });
+export async function POST(request: NextRequest) {
+  try {
+    // Mock implementation without Clerk
+    const body = await request.json();
+    
+    return NextResponse.json({
+      id: "new-segment-id",
+      name: body.name,
+      description: body.description,
+      criteria: body.criteria,
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to create segment" },
+      { status: 500 }
+    );
+  }
 }

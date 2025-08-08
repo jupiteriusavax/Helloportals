@@ -1,20 +1,53 @@
-import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
-import { NextResponse } from "next/server";
-import { Prisma, RoomType } from "@prisma/client";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function GET(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return new NextResponse("Unauthorized", { status: 401 });
-  const url = new URL(req.url);
-  const typeParam = url.searchParams.get("type");
-  let where: Prisma.RoomWhereInput = {};
-  if (typeParam) {
-    const upper = typeParam.toUpperCase();
-    if (upper === "SALES" || upper === "SUCCESS") {
-      where = { type: upper as RoomType };
-    }
+export async function GET(request: NextRequest) {
+  try {
+    // Mock implementation without Clerk and Prisma
+    const rooms = [
+      {
+        id: "1",
+        name: "Sales Room",
+        type: "SALES",
+        description: "Salle de vente pour les prospects",
+        status: "active",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "2",
+        name: "Success Room", 
+        type: "SUCCESS",
+        description: "Salle de succès client",
+        status: "active",
+        createdAt: new Date().toISOString()
+      }
+    ];
+    
+    return NextResponse.json(rooms);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to fetch rooms" },
+      { status: 500 }
+    );
   }
-  const rooms = await prisma.room.findMany({ where, take: 50, orderBy: { updatedAt: "desc" } });
-  return NextResponse.json(rooms);
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // Mock implementation without Clerk and Prisma
+    const body = await request.json();
+    
+    return NextResponse.json({
+      id: "new-room-id",
+      name: body.name,
+      type: body.type,
+      description: body.description,
+      status: "active",
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to create room" },
+      { status: 500 }
+    );
+  }
 }

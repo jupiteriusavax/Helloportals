@@ -1,13 +1,25 @@
 import React from "react";
 
-export type Status = "done" | "pending";
+export type Status = "draft" | "published" | "archived";
 
 export function StatusDot({ status }: { status: Status }) {
-  const isDone = status === "done";
+  const getColor = (status: Status) => {
+    switch (status) {
+      case "published":
+        return "bg-green-500";
+      case "draft":
+        return "bg-yellow-500";
+      case "archived":
+        return "bg-gray-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
   return (
     <span
-      aria-label={isDone ? "done" : "pending"}
-      className={`ml-auto inline-block h-2.5 w-2.5 rounded-full ${isDone ? "bg-green-500" : "bg-red-500"}`}
+      aria-label={status}
+      className={`ml-auto inline-block h-2.5 w-2.5 rounded-full ${getColor(status)}`}
     />
   );
 }

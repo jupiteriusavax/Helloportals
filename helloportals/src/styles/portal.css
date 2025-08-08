@@ -1,0 +1,6 @@
+.hp-badge{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.9);color:#111;font-size:11px;border-radius:9999px;padding:2px 8px;border:1px solid rgba(0,0,0,.05)}
+.hp-btn{border:1px solid #e5e7eb;border-radius:8px;padding:4px 10px;font-size:12px;background:#fff}
+.hp-label{font-size:12px;color:#6b7280}
+.hp-input{display:block;width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:6px 8px;font-size:13px}
+.hp-tab{border:1px solid #e5e7eb;border-radius:9999px;padding:4px 10px;font-size:12px;background:#fff}
+.hp-tab-active{background:#2563eb;color:#fff;border-color:#2563eb}

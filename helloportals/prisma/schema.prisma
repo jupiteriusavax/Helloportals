@@ -1,0 +1,193 @@
+// datasource and generator
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleType {
+  INTERNAL
+  CLIENT
+  STAKEHOLDER
+}
+
+enum LifecycleStage {
+  PRE_ONBOARDING
+  ONBOARDING
+  ADOPTION
+  EXPANSION
+}
+
+enum IntegrationType {
+  SALESFORCE
+  NOTION
+  JIRA
+  SLACK
+}
+
+enum RoomType {
+  SALES
+  SUCCESS
+}
+
+model Organization {
+  id           String              @id @default(cuid())
+  name         String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  users        Membership[]
+  accounts     Account[]
+  playbooks    Playbook[]
+  segments     Segment[]
+  triggers     Trigger[]
+  sections     PortalSection[]
+  rooms        Room[]
+  integrations IntegrationConnection[]
+}
+
+model UserProfile {
+  id           String        @id @default(cuid())
+  clerkUserId  String        @unique
+  email        String        @unique
+  fullName     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  memberships  Membership[]
+}
+
+model Membership {
+  id             String        @id @default(cuid())
+  userId         String
+  orgId          String
+  accountId      String?
+  roleType       RoleType
+  role           String        // e.g., CSM, Sponsor, Admin
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  user           UserProfile   @relation(fields: [userId], references: [id])
+  organization   Organization  @relation(fields: [orgId], references: [id])
+  account        Account?      @relation(fields: [accountId], references: [id])
+
+  @@index([orgId])
+  @@index([accountId])
+}
+
+model Account {
+  id              String          @id @default(cuid())
+  orgId           String
+  name            String
+  arrCents        Int             @default(0)
+  stage           LifecycleStage  @default(PRE_ONBOARDING)
+  engagementScore Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  organization    Organization    @relation(fields: [orgId], references: [id])
+  contacts        Membership[]
+  playbooks       Playbook[]
+  triggers        Trigger[]
+  rooms           Room[]
+
+  @@index([orgId])
+}
+
+model Playbook {
+  id          String       @id @default(cuid())
+  orgId       String
+  accountId   String?
+  name        String
+  isTemplate  Boolean      @default(false)
+  graphJson   Json         // ReactFlow nodes+edges
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  account      Account?     @relation(fields: [accountId], references: [id])
+
+  @@index([orgId])
+  @@index([accountId])
+}
+
+model Segment {
+  id          String       @id @default(cuid())
+  orgId       String
+  name        String
+  definition  Json         // rules for lifecycle, engagement, ARR, roles
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+}
+
+model Trigger {
+  id          String       @id @default(cuid())
+  orgId       String
+  accountId   String?
+  name        String
+  expression  Json         // trigger condition expression
+  actions     Json         // actions such as show/hide sections, send webhook, create task
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  account      Account?     @relation(fields: [accountId], references: [id])
+
+  @@index([orgId])
+  @@index([accountId])
+}
+
+model PortalSection {
+  id          String       @id @default(cuid())
+  orgId       String
+  key         String
+  title       String
+  config      Json         // UI config and data binding
+  visibility  Json         // conditions for visibility (segments, triggers)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+  @@unique([orgId, key])
+}
+
+model Room {
+  id          String       @id @default(cuid())
+  orgId       String
+  accountId   String
+  type        RoomType
+  name        String
+  config      Json
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  account      Account      @relation(fields: [accountId], references: [id])
+
+  @@index([orgId])
+  @@index([accountId])
+}
+
+model IntegrationConnection {
+  id           String           @id @default(cuid())
+  orgId        String
+  type         IntegrationType
+  accessToken  String?
+  refreshToken String?
+  metadata     Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  organization Organization     @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+}

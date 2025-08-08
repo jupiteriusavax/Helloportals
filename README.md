@@ -182,6 +182,15 @@ Si vous rencontrez des erreurs d'import avec `@/components`, les chemins ont ét
 - `helloportals/src/components/playbooks/PlaybooksPage.tsx`
 - `helloportals/src/components/playbooks/PlaybookCard.tsx`
 
+### Configuration du projet helloportals
+Le projet helloportals a été configuré avec :
+
+- **`helloportals/package.json`** - Dépendances mises à jour
+- **`helloportals/next.config.js`** - Configuration Next.js corrigée
+- **`helloportals/tsconfig.json`** - Configuration TypeScript
+- **`helloportals/tailwind.config.js`** - Configuration Tailwind
+- **`helloportals/postcss.config.js`** - Configuration PostCSS
+
 ### Erreur de build Next.js
 Si vous avez des erreurs de build, assurez-vous que :
 - Toutes les dépendances sont installées : `npm install`
@@ -230,3 +239,4 @@ Le projet est compatible avec toutes les plateformes supportant Next.js :
 - Structure Next.js complète avec pages/, configuration TypeScript et PostCSS
 - Les chemins d'import ont été corrigés pour éviter les erreurs de compilation
 - Le fichier ReactFlow a été temporairement désactivé pour éviter les erreurs de build
+- Le projet helloportals a été configuré avec les bonnes dépendances et configurations

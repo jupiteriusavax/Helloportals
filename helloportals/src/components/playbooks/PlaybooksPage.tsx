@@ -73,15 +73,13 @@ const mockPlaybooks: Playbook[] = [
 
 export function PlaybooksPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const filteredPlaybooks = mockPlaybooks.filter((playbook) => {
     const matchesSearch = playbook.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase()) ||
       playbook.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || playbook.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   return (
@@ -101,10 +99,8 @@ export function PlaybooksPage() {
         </div>
 
         <FilterBar
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
+          search={searchTerm}
+          onSearch={setSearchTerm}
         />
 
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -116,3 +112,5 @@ export function PlaybooksPage() {
     </div>
   );
 }
+
+export default PlaybooksPage;

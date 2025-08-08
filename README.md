@@ -141,6 +141,7 @@ const colorByStatus: Record<OrderFormStatus, string> = {
 - TypeScript
 - Tailwind CSS
 - Next.js 14+
+- ReactFlow (optionnel, pour l'éditeur de playbooks)
 
 ## 🛠️ Développement
 
@@ -157,6 +158,27 @@ npm run build
 # Lancer en production
 npm start
 ```
+
+## 🚨 Résolution des erreurs
+
+### Erreur ReactFlow
+Si vous rencontrez une erreur liée à `reactflow`, le fichier `helloportals/src/app/(app)/playbooks/editor/page.tsx` a été temporairement désactivé. Pour le réactiver :
+
+1. **Option 1 : Installer ReactFlow**
+```bash
+npm install reactflow
+```
+
+2. **Option 2 : Supprimer le fichier problématique**
+```bash
+rm helloportals/src/app/\(app\)/playbooks/editor/page.tsx
+```
+
+### Erreur de build Next.js
+Si vous avez des erreurs de build, assurez-vous que :
+- Toutes les dépendances sont installées : `npm install`
+- Le fichier `pages/` existe avec `index.tsx`
+- Les fichiers de configuration sont présents (`next.config.js`, `tsconfig.json`, etc.)
 
 ## 🚀 Déploiement
 
@@ -183,3 +205,4 @@ Le projet est compatible avec toutes les plateformes supportant Next.js :
 - Tous les composants sont TypeScript et réutilisables
 - L'interface est responsive et accessible
 - Structure Next.js complète avec pages/, configuration TypeScript et PostCSS
+- Le fichier ReactFlow a été temporairement désactivé pour éviter les erreurs de build

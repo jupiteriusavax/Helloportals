@@ -1,11 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { PlusIcon } from "@heroicons/react/24/outline";
 import { FilterBar } from "./FilterBar";
 import { PlaybookCard } from "./PlaybookCard";
-
 import { Button } from "../ui/button";
+
+// Icône SVG inline
+const PlusIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+  </svg>
+);
 
 interface Playbook {
   id: string;
@@ -93,8 +98,8 @@ export function PlaybooksPage() {
             </p>
           </div>
           <Button className="bg-blue-600 hover:bg-blue-700">
-            <PlusIcon className="h-5 w-5 mr-2" />
-            New Playbook
+            <PlusIcon />
+            <span className="ml-2">New Playbook</span>
           </Button>
         </div>
 
